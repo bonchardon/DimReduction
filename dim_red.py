@@ -22,6 +22,32 @@ from scipy import stats
 import seaborn as sns
 
 
+def text_prep(file_path):
+    words = open(file_path, 'r', encoding='utf-8-sig')
+    words = words.read().split(' ')
+
+    lemmatizer = WordNetLemmatizer()
+
+    """
+    deleting stop words to upgrade overall results
+    """
+
+    stop_words = stopwords.words()
+    stop_words.extend(['th', 'asd'])
+    words = [word for word in words if not word in stop_words]
+
+    """
+    decided to use lemmatization as well, to ensure the dimensionality is efficiently reduced
+    """
+    lemmatized_words = [lemmatizer.lemmatize(w) for w in words]
+
+    vectorizer = CountVectorizer(binary=False, min_df=2)
+    X = vectorizer.fit_transform(lemmatized_words)
+    feature_names = vectorizer.get_feature_names()
+    X = X.toarray()
+    return X, words
+
+
 def svd_analysis(file_path):
 
     """
@@ -220,14 +246,7 @@ def latent_dirichlet(file_path):
 
 if __name__ == '__main__':
 
-    print(svd_analysis(file_path='wikitext1.txt'))
-
-    # calculate the Euclidean distance between two vectors
-    def euclidean_distance(row1, row2):
-        distance = 0.0
-        for i in range(len(row1) - 1):
-            distance += (row1[i] - row2[i]) ** 2
-        return np.sqrt(distance)
+    X, words = text_prep(file_path='wikitext1.txt')
 
     """"
     The way to check and get topics of each of the model
@@ -250,5 +269,5 @@ if __name__ == '__main__':
             df['Words'] = words
             print(df)
 
-    display_word_dist(model=svd_model, feature_names=feature_names_svd, n_word=300, components_vecs=svd_components)
+#     display_word_dist(model=svd_model, feature_names=feature_names_svd, n_word=300, components_vecs=svd_components)
 
