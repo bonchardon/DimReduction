@@ -15,7 +15,6 @@ class PreProcessing:
         example_text = open(file_link, 'r',
                             encoding='utf-8-sig').read()
         example_text = example_text.split(' ')
-        print(len(example_text))
 
         lemmatizer = WordNetLemmatizer()
         stop_words = stopwords.words()
@@ -23,7 +22,6 @@ class PreProcessing:
         words = [word for word in example_text if not word in stop_words]
 
         lemmatized_words = [lemmatizer.lemmatize(w) for w in words]
-        print(len(lemmatized_words))
 
         return lemmatized_words
 
@@ -94,6 +92,6 @@ class Vectorization:
 
 if __name__ == "__main__":
 
-    pre = PreProcessing()
-    vec = Vectorization()
+    PreProcessing()
+    Vectorization()
 
