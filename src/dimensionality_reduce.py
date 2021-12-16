@@ -32,11 +32,30 @@ import seaborn as sns
 from DimReduction.src.pre_stage import PreProcessing, Vectorization
 from DimReduction.src.distance_metrics import DistanceMetrics
 
-pre = PreProcessing()
-vec = Vectorization()
 
 
-class DimensionRed:
+"""
+    Dimensionality reduction for text analysis:
+
+    Dimensionality reduction is feature selection/feature extraction. 
+
+    Feature selection ==> reduces the dimensions in an univariate manner, i.e. it removes terms on an individual basis as 
+    they currently appear without altering them; using this method, we reduce dimensionality by excluding less useful features.
+
+    Feature extraction ==> is multivaritate, combining one or more single terms together to produce higher orthangonal terms that
+    contain more information and reduce the feature space; here we transform data into lower dimensions.
+"""
+
+
+class FeatureExtraction:
+    """
+        Types of feature extraction for dimensionality reduction:
+
+            (1) AutoEncoders (unsupervised Artificial Neural Network);
+            (2) PCA;
+            (3) LDA.
+     """
+
 
     def __init__(self):
         pass
@@ -104,25 +123,37 @@ class DimensionRed:
         X_df_lda = X_df_lda.drop_duplicates(X_df_lda.index.duplicated(keep='first'))
         words_cleaned_lda = [w for w in X_df_lda.index]
 
+    def autoencoder(data):
+        encoded_dim = 2
+        encoder = Sequential([
+            Conv2D(input_shape=(44, 44, 3), filters=64, kernel_size=(3, 3), activation='relu', padding='same'),
+            MaxPooling2D((2, 2), padding='same'),
+            Conv2D(32, (3, 3), activation='relu', padding='same'),
+            MaxPooling2D((2, 2), padding='same'),
+            Conv2D(16, (3, 3), activation='relu', padding='same'),
+            Flatten(),
+            Dense(encoded_dim)
+        ])
 
-class Features:
+        pretrain_encodings = encoder(data).numpy()
+
+        decoder = Sequential([
+            Dense(1936, activation='relu', input_shape=(encoded_dim,)),
+            Reshape((11, 11, 16)),
+            Conv2D(32, (3, 3), activation='relu', padding='same'),
+            UpSampling2D((2, 2)),
+            Conv2D(64, (3, 3), activation='relu', padding='same'),
+            UpSampling2D((2, 2)),
+            Conv2D(3, (3, 3), padding='same')
+        ])
+
+        # TODO: start to compile and train autoencoder
+
+
+class FeatureSelection:
 
     def __init__(self):
         pass
-
-    """
-    Dimensionality reduction for text analysis:
-    
-    Dimensionality reduction is feature selection/feature extraction. 
-    
-    Feature selection ==> reduces the dimensions in an univariate manner, i.e. it removes terms on an individual basis as 
-    they currently appear without altering them; using this method, we reduce dimensionality by excluding less useful features.
-    
-    Feature extraction ==> is multivaritate, combining one or more single terms together to produce higher orthangonal terms that
-    contain more information and reduce the feature space; here we transform data into lower dimensions.
-    """
-
-    def selection(self, txt):
 
         """
         Types of feature selection for dim reduction:
@@ -135,85 +166,38 @@ class Features:
         :return:
         """
 
-        def feature_elimination(data):
+    def feature_elimination(self, data):
 
-            pass
+        pass
 
-        def feature_selection(data):
+    def feature_selection(self, data):
 
-            pass
+        pass
 
-        def forward_selection(data):
+    def forward_selection(self, data):
 
-            pass
+        pass
 
-        feature_elimination(data=txt)
-        feature_selection(data=txt)
-        forward_selection(data=txt)
 
-    def extraction(self, txt):
+class Alternative:
+    """
+    Other ways to reduce dimensionality is:
 
-        """
-        Types of feature extraction for dimensionality reduction:
+        1) try to train sparse model (like SGDClassifier with huge L1 penalty (why not L2, since it's about euclidiean distance measurement).
+        (1.1.) it might help to transform word-count using TF-IDF before using the data in a linear classifier.
 
-            (1) AutoEncoders (unsupervised Artificial Neural Network);
-            (2) PCA;
-            (3) LDA.
+        (2) we can also use pre-trained dimensionality reducer, such as word2vec / fastText to extract features from text.
+    """
 
-        :param txt:
-        :return:
-        """
-        def autoencoder(data):
-
-            encoded_dim = 2
-            encoder = Sequential([
-                Conv2D(input_shape=(44, 44, 3), filters=64, kernel_size=(3, 3), activation='relu', padding='same'),
-                MaxPooling2D((2, 2), padding='same'),
-                Conv2D(32, (3, 3), activation='relu', padding='same'),
-                MaxPooling2D((2, 2), padding='same'),
-                Conv2D(16, (3, 3), activation='relu', padding='same'),
-                Flatten(),
-                Dense(encoded_dim)
-            ])
-
-            pretrain_encodings = encoder(data).numpy()
-
-            decoder = Sequential([
-                Dense(1936, activation='relu', input_shape=(encoded_dim,)),
-                Reshape((11, 11, 16)),
-                Conv2D(32, (3, 3), activation='relu', padding='same'),
-                UpSampling2D((2, 2)),
-                Conv2D(64, (3, 3), activation='relu', padding='same'),
-                UpSampling2D((2, 2)),
-                Conv2D(3, (3, 3), padding='same')
-            ])
-
-            # TODO: start to compile and train autoencoder
-
-        autoencoder(data=txt)
+    def __init__(self):
+        pass
 
 
 if __name__ == "__main__":
 
-    """
-    In NLP, the aspect of word vectors (as numerical representation of words in corpora/dataset) and dimensionality reduction
-    are some of the most important. 
-    """
     pre = PreProcessing()
     vec = Vectorization()
 
-    reducing = DimensionRed()
-    
+    extraction = FeatureExtraction()
+    selection = FeatureSelection()
     distance = DistanceMetrics()
-
-
-    """
-    Other ways to reduce dimensionality is:
-    
-        (1) try to train sparse model (like SGDClassifier with huge L1 penalty (why not L2, since it's about euclidiean distance measurement).
-        (1.1.) it might help to transform word-count using TF-IDF before using the data in a linear classifier.
-        
-        (2) we can also use pre-trained dimensionality reducer, such as word2vec / fastText to extract features from text.     
-    """
-
-
