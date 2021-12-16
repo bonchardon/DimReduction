@@ -13,25 +13,18 @@ from nltk.stem import WordNetLemmatizer
 # nltk.download('stopwords')
 # nltk.download('wordnet')
 
-from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer, HashingVectorizer
-from sklearn.metrics.pairwise import euclidean_distances
 from sklearn.decomposition import PCA
 from sklearn.manifold import Isomap
-from sklearn.neighbors import DistanceMetric
+from sklearn.feature_selection import RFE
 from sklearn.decomposition import TruncatedSVD
 from sklearn.decomposition import FactorAnalysis
 from sklearn.decomposition import LatentDirichletAllocation
-from sklearn.metrics.pairwise import cosine_similarity
 from sklearn import svm, datasets
 from tensorflow.keras.models import Model, Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, UpSampling2D, Dropout, Flatten, Dense, Reshape
 
-from scipy import stats
-import seaborn as sns
-
 from DimReduction.src.pre_stage import PreProcessing, Vectorization
 from DimReduction.src.distance_metrics import DistanceMetrics
-
 
 
 """
@@ -55,7 +48,6 @@ class FeatureExtraction:
             (2) PCA;
             (3) LDA.
      """
-
 
     def __init__(self):
         pass
@@ -168,7 +160,16 @@ class FeatureSelection:
 
     def feature_elimination(self, data):
 
-        pass
+        """
+        RFE works by searching for a subset of features by starting with all features in the training dataset
+        and successfully removing features until the desired number remains.
+
+        This is achieved by fitting the given machine learning algorithm used in the core of the model,
+        ranking features by importance, discarding the least important features, and re-fitting the model.
+        This process is repeated until a specified number of features remains.
+        """
+
+        rfe = RFE
 
     def feature_selection(self, data):
 
@@ -180,6 +181,7 @@ class FeatureSelection:
 
 
 class Alternative:
+
     """
     Other ways to reduce dimensionality is:
 
