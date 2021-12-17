@@ -13,13 +13,20 @@ from nltk.stem import WordNetLemmatizer
 # nltk.download('stopwords')
 # nltk.download('wordnet')
 
+from genetic_selection import GeneticSelectionCV
+from sklearn import datasets, linear_model
+from sklearn.model_selection import StratifiedKFold
 from sklearn.decomposition import PCA
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.manifold import Isomap
-from sklearn.feature_selection import RFE
+from sklearn.linear_model import LogisticRegression
+from sklearn.feature_selection import SequentialFeatureSelector
+from sklearn.feature_selection import RFE, RFECV
 from sklearn.decomposition import TruncatedSVD
 from sklearn.decomposition import FactorAnalysis
 from sklearn.decomposition import LatentDirichletAllocation
 from sklearn import svm, datasets
+from sklearn.tree import DecisionTreeClassifier
 from tensorflow.keras.models import Model, Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, UpSampling2D, Dropout, Flatten, Dense, Reshape
 
@@ -152,10 +159,7 @@ class FeatureSelection:
 
             (1) recursive feature elimination;
             (2) genetic feature selection;
-            (3) sequential forward selection.
-
-        :param txt:
-        :return:
+            (3) sequential feature selection (forward/backward).
         """
 
     def feature_elimination(self, data):
@@ -169,15 +173,68 @@ class FeatureSelection:
         This process is repeated until a specified number of features remains.
         """
 
-        rfe = RFE
+        # TODO: figure out how to split the data effectively into X, y values for further use
+
+        X, y = None
+
+        # There might be useful to drop highly correlated features by making a correlating matrix.
+        correlated_features = set()
+        correlation_matr = data.corr()
+
+        for i in range(len(correlation_matr.columns)):
+            for j in range(i):
+                if abs(correlation_matr.iloc[i, j]) > 0.8:
+                    colname = correlation_matr.columns[i]
+                    correlated_features.add(colname)
+
+        # if use RFECV, the number of features to select will be chosen automatically
+        rfecv = RFECV(estimator=DecisionTreeClassifier(), step=1, cv=StratifiedKFold(10), scoring='accuracy')
+        rfecv.fit(X, y)
 
     def feature_selection(self, data):
 
-        pass
+        """
+        Genetic algorithms mimic the process of natural selection
+        to search for optimal values of a function.
+        """
+        X, y = None
+        estimator = linear_model.LogisticRegression(solver="liblinear", multi_class="ovr")
+        selector = GeneticSelectionCV(estimator,
+                                      cv=5,
+                                      verbose=1,
+                                      scoring="accuracy",
+                                      max_features=5,
+                                      n_population=50,
+                                      crossover_proba=0.5,
+                                      mutation_proba=0.2,
+                                      n_generations=40,
+                                      crossover_independent_proba=0.5,
+                                      mutation_independent_proba=0.05,
+                                      tournament_size=3,
+                                      n_gen_no_change=10,
+                                      caching=True,
+                                      n_jobs=-1)
+        selector = selector.fit_transform(X)
 
-    def forward_selection(self, data):
+    def seq_feature_selection(self, data):
+        """
+        Some of the common techniques used for feature selection
+        includes regularization techniques (L1 / L2 norm) and sequential forward / backward feature selection.
 
-        pass
+        The transformer that performs Sequential Feature Selection.
+
+        "The Sequential Feature Selection adds (forward selection)
+        or removes (backward selection) features to form a feature subset in a greedy fashion.
+        At each stage, this estimator chooses the best feature to add or remove based on the cross-validation score of an estimator.
+        In the case of unsupervised learning, this Sequential Feature Selector looks only at the features (X),
+        not the desired outputs (y)."
+        """
+        X, y = data
+        lr = LogisticRegression(C=1.0, random_state=1)
+        knn = KNeighborsClassifier(n_neighbors=3)
+        sfs = SequentialFeatureSelector(knn, n_features_to_select=100)
+        sfs.fit_transform(X, y)
+        return sfs.get_feature_names_out()
 
 
 class Alternative:
@@ -185,10 +242,10 @@ class Alternative:
     """
     Other ways to reduce dimensionality is:
 
-        1) try to train sparse model (like SGDClassifier with huge L1 penalty (why not L2, since it's about euclidiean distance measurement).
+        1) try to train sparse model (like SGDClassifier with huge L1 penalty.
         (1.1.) it might help to transform word-count using TF-IDF before using the data in a linear classifier.
 
-        (2) we can also use pre-trained dimensionality reducer, such as word2vec / fastText to extract features from text.
+        (2) we can also use pre-trained dimensionality reducer, such as word2vec/fastText to extract features from text.
     """
 
     def __init__(self):
@@ -203,3 +260,8 @@ if __name__ == "__main__":
     extraction = FeatureExtraction()
     selection = FeatureSelection()
     distance = DistanceMetrics()
+
+    test_text = pre.txt_preprocess(file_link='wikitext1.txt')
+    test_text = vec.vec_hash(test_text)
+
+    print(selection.seq_feature_selection(data=test_text))
