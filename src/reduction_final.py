@@ -7,6 +7,7 @@ def grouping_data():
 
     pass
 
+
 def visualization():
 
     pass
