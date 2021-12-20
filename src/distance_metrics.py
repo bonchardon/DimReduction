@@ -9,6 +9,10 @@ class DistanceMetrics:
     def __init__(self):
         pass
 
+    """
+    Below are distance metrics for real-valued vector space.
+    """
+
     def euclid_dist(self, dataframe):
 
         # one of the possible alternatives
@@ -41,6 +45,16 @@ class DistanceMetrics:
         first_100_words_manhattan = X_manhat_dist.sort_values(by=[0, 1, 2, 3, 4, 5, 6],
                                                               ascending=False).index[0:100]
         return first_100_words_manhattan
+
+    def cheb_dist(self, dataframe):
+
+        dist_cheb = DistanceMetric.get_metric('chebyshev')
+        values = dist_cheb.pairwise(dataframe)
+
+        X_cheb = pd.DataFrame(values, index=dataframe.index)
+
+        first_100_words = X_cheb.sort_values(by=[0, 1, 2, 3, 4, 5, 6], ascending=False).index[0:100]
+        return first_100_words
 
 
 if __name__ == "__main__":

@@ -4,6 +4,9 @@ from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer, HashingVectorizer
+from sklearn.pipeline import make_pipeline
+from eli5.sklearn import InvertableHashingVectorizer
+from sklearn.linear_model import SGDClassifier
 
 
 class PreProcessing:
@@ -34,10 +37,9 @@ class Vectorization:
     def vec_count(self, cleaned_words):
 
         """
+        Count vectorizer to
 
-
-        :param cleaned_words:
-        :return:
+        :param cleaned_words: preproesses data sample for the further analysis.
         """
 
         vectorizer = CountVectorizer(binary=False, min_df=2)
@@ -82,16 +84,46 @@ class Vectorization:
         return df
 
     def vec_hash(self, cleaned_words):
-        vectorizer = HashingVectorizer()
+
+        """
+        One of the ways from debugging HashingVectorizer: 
+
+        Note: "There is no way to compute the inverse transform (from feature indices to string feature names)
+        which can be a problem when trying to introspect which features are most important to a model."
+        """
+        vectorizer = HashingVectorizer(stop_words='english', ngram_range=(1,2))
         X = vectorizer.fit_transform(cleaned_words)
-        return X
+
+        # ivec = InvertableHashingVectorizer(vectorizer)
+        # ivec.fit(cleaned_words)
+
+        # df = pd.DataFrame(
+        #     X.todense(),
+        #     columns=ivec.get_feature_names()
+        # )
+
+        return vectorizer.get_stop_words()
 
     def vec_bow(self, cleaned_words):
+
+        """
+        We can also use pre-trained dimensionality reducer,
+        such as word2vec/fastText to extract features from text.
+
+        Here we use gensim pretrained word vectorizer.
+
+        """
+
         pass
 
 
 if __name__ == "__main__":
 
-    PreProcessing()
-    Vectorization()
+    pre = PreProcessing()
+    test_text = pre.txt_preprocess(file_link='wikitext1.txt')
+
+    vec = Vectorization()
+    test_text_try = vec.vec_hash(cleaned_words=test_text)
+
+    print(test_text_try)
 
