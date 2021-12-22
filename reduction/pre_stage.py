@@ -1,7 +1,9 @@
 import nltk
+import logging
 import pandas as pd
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
+from itertools import islice
 
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer, HashingVectorizer
 from sklearn.pipeline import make_pipeline
@@ -14,6 +16,7 @@ class PreProcessing:
     def __init__(self):
         pass
 
+    @classmethod
     def txt_preprocess(self, file_link):
         example_text = open(file_link, 'r',
                             encoding='utf-8-sig').read()
@@ -28,6 +31,11 @@ class PreProcessing:
 
         return lemmatized_words
 
+    def chunks(self, data, size=1000):
+        it = iter(data)
+        for i in range(0, len(data), size):
+            yield list(data[k] for k in islice(it, size))
+
 
 class Vectorization:
 
@@ -36,16 +44,10 @@ class Vectorization:
 
     def vec_count(self, cleaned_words):
 
-        """
-        Count vectorizer to
-
-        :param cleaned_words: preproesses data sample for the further analysis.
-        """
-
         vectorizer = CountVectorizer(binary=False, min_df=2)
         X = vectorizer.fit_transform(cleaned_words)
         feature_names = vectorizer.get_feature_names()
-        # X = X.toarray()
+        X = X.toarray()
 
         return X
 
@@ -71,13 +73,24 @@ class Vectorization:
                                 This parameter is ignored if vocabulary is not None.
         """
 
-        vectorizer = TfidfVectorizer(min_df=3, max_df=0.5, ngram_range=(1, 2))
-        X = vectorizer.fit_transform(cleaned_words)
+        chunk1 = ' '.join(cleaned_words[0:3000])
+        chunk2 = ' '.join(cleaned_words[3000:6000])
+        chunk3 = ' '.join(cleaned_words[6000:8000])
+        chunk4 = ' '.join(cleaned_words[8000:10000])
+        chunk5 = ' '.join(cleaned_words[10000:])
+
+        chunks = [chunk1, chunk2, chunk3, chunk4, chunk5]
+
+        vectorizer = TfidfVectorizer()
+
+        X = vectorizer.fit_transform(chunks)
+        matrix = X.todense()
+        list_dense = matrix.tolist()
 
         #
         pd.set_option('display.float_format', lambda x: '%.e2' % x)
         df = pd.DataFrame(
-                            X.todense(),
+                            list_dense,
                             columns=vectorizer.get_feature_names()
                             )
 
@@ -104,26 +117,17 @@ class Vectorization:
 
         return vectorizer.get_stop_words()
 
-    def vec_bow(self, cleaned_words):
-
-        """
-        We can also use pre-trained dimensionality reducer,
-        such as word2vec/fastText to extract features from text.
-
-        Here we use gensim pretrained word vectorizer.
-
-        """
-
-        pass
-
 
 if __name__ == "__main__":
+
+    logging.basicConfig()
+    log = logging.getLogger(__name__)
+    log.setLevel(logging.INFO)
 
     pre = PreProcessing()
     test_text = pre.txt_preprocess(file_link='wikitext1.txt')
 
     vec = Vectorization()
-    test_text_try = vec.vec_hash(cleaned_words=test_text)
+    test_text_try = vec.vec_TF_IDF(cleaned_words=test_text)
 
     print(test_text_try)
-
