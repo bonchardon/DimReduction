@@ -3,9 +3,13 @@ The overall workflow on dimensionality reduction and distance metrics techniques
 
 """
 
+from gensim import models
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+
+from scipy import spatial
 
 import nltk
 from nltk.corpus import stopwords
@@ -237,7 +241,7 @@ class FeatureSelection:
         return sfs.get_feature_names_out()
 
 
-class Alternative:
+class Alternative(Vectorization):
 
     """
     Other ways to reduce dimensionality is:
@@ -249,6 +253,42 @@ class Alternative:
     """
 
     def __init__(self):
+        pass
+
+    def word2vec(self, cleaned_data):
+
+        # TODO: prepare word2vec model for further work
+
+        w2v = models.KeyedVectors.load_word2vec_format(
+                            './GoogleNews-vectors-negative300.bin',
+                            binary=True)
+        custom_model = models.Word2Vec(cleaned_data,
+                                       min_count=1, size=300,
+                                       workers=4)
+        return custom_model
+
+    def glove(self, cleaned_data):
+
+        embeddings = {}
+
+        with open('models/glove.6B.50d.txt', 'rb') as f:
+            for line in f:
+                values = line.split()
+                word = values[0]
+                vector = np.asarray(values[1:], "float32")
+                embeddings[word] = vector
+
+
+            # getting closest word by using glove algo
+            def find_closest_embeddings(embedding):
+                return sorted(embeddings.keys(), key=lambda word:
+
+            spatial.distance.euclidean(embeddings[word], embedding))
+
+            find_closest_embeddings(embeddings[b"example"])[:10]
+
+    def fastText(self, cleaned_data):
+
         pass
 
 
