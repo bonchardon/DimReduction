@@ -17,7 +17,7 @@ from nltk.stem import WordNetLemmatizer
 # nltk.download('stopwords')
 # nltk.download('wordnet')
 
-from genetic_selection import GeneticSelectionCV
+# from genetic_selection import GeneticSelectionCV
 from sklearn import datasets, linear_model
 from sklearn.model_selection import StratifiedKFold
 from sklearn.decomposition import PCA
@@ -31,6 +31,7 @@ from sklearn.decomposition import FactorAnalysis
 from sklearn.decomposition import LatentDirichletAllocation
 from sklearn import svm, datasets
 from sklearn.tree import DecisionTreeClassifier
+
 from tensorflow.keras.models import Model, Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, UpSampling2D, Dropout, Flatten, Dense, Reshape
 
@@ -52,6 +53,7 @@ from DimReduction.src.distance_metrics import DistanceMetrics
 
 
 class FeatureExtraction:
+
     """
         Types of feature extraction for dimensionality reduction:
 
@@ -73,7 +75,8 @@ class FeatureExtraction:
         """
 
         trans = svm.SVC()
-        trans.fit(X)
+        trans.fit(X, y=None)
+
 
     def svd(self, X, words):
         n_components = 3
@@ -126,7 +129,8 @@ class FeatureExtraction:
         X_df_lda = X_df_lda.drop_duplicates(X_df_lda.index.duplicated(keep='first'))
         words_cleaned_lda = [w for w in X_df_lda.index]
 
-    def autoencoder(data):
+    def autoencoder(self, data):
+
         encoded_dim = 2
         encoder = Sequential([
             Conv2D(input_shape=(44, 44, 3), filters=64, kernel_size=(3, 3), activation='relu', padding='same'),
@@ -221,6 +225,7 @@ class FeatureSelection:
         selector = selector.fit_transform(X)
 
     def seq_feature_selection(self, data):
+
         """
         Some of the common techniques used for feature selection
         includes regularization techniques (L1 / L2 norm) and sequential forward / backward feature selection.
@@ -248,7 +253,6 @@ class Alternative(Vectorization):
 
         1) try to train sparse model (like SGDClassifier with huge L1 penalty.
         (1.1.) it might help to transform word-count using TF-IDF before using the data in a linear classifier.
-
         (2) we can also use pre-trained dimensionality reducer, such as word2vec/fastText to extract features from text.
     """
 

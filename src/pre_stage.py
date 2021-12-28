@@ -36,6 +36,16 @@ class PreProcessing:
         for i in range(0, len(data), size):
             yield list(data[k] for k in islice(it, size))
 
+    def chunks2_note(self, cleaned_words):
+        chunk1 = ' '.join(cleaned_words[0:3000])
+        chunk2 = ' '.join(cleaned_words[3000:6000])
+        chunk3 = ' '.join(cleaned_words[6000:8000])
+        chunk4 = ' '.join(cleaned_words[8000:9000])
+        chunk5 = ' '.join(cleaned_words[9000:])
+
+        chunks = [chunk1, chunk2, chunk3, chunk4, chunk5]
+        return chunks
+
 
 class Vectorization:
 
@@ -79,17 +89,9 @@ class Vectorization:
                                 This parameter is ignored if vocabulary is not None.
         """
 
-        chunk1 = ' '.join(cleaned_words[0:3000])
-        chunk2 = ' '.join(cleaned_words[3000:6000])
-        chunk3 = ' '.join(cleaned_words[6000:8000])
-        chunk4 = ' '.join(cleaned_words[8000:9000])
-        chunk5 = ' '.join(cleaned_words[9000:])
-
-        chunks = [chunk1, chunk2, chunk3, chunk4, chunk5]
-
         vectorizer = TfidfVectorizer()
 
-        X = vectorizer.fit_transform(chunks)
+        X = vectorizer.fit_transform(cleaned_words)
         matrix = X.todense()
         list_dense = matrix.tolist()
 
