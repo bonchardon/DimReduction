@@ -132,6 +132,45 @@ class Vectorization:
         return vectorizer.get_stop_words()
 
 
+class Scaling:
+
+    def __init__(self):
+        pass
+
+    def normalization(self):
+
+        """
+        Normalization is a rescaling of the data from the original range
+        so that all values are within the new range of 0 and 1.
+
+        A value is normalized as follows:
+
+                y = (x – min) / (max – min)
+
+        """
+        pass
+
+    def standardization(self):
+
+        """
+        Standardizing a dataset involves rescaling the distribution of values
+        so that the mean of observed values is 0 and the standard deviation is 1.
+
+        A value is standardized as follows:
+
+                y = (x – mean) / standard_deviation
+
+
+        Where the mean is calculated as:
+
+                mean = sum(x) / count(x)
+        And the standard_deviation is calculated as:
+
+                standard_deviation = sqrt( sum( (x – mean)^2 ) / count(x))
+        """
+        pass
+
+
 if __name__ == "__main__":
 
     logging.basicConfig()

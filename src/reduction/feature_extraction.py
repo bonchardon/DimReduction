@@ -29,6 +29,7 @@ from sklearn.feature_selection import RFE, RFECV
 from sklearn.decomposition import TruncatedSVD
 from sklearn.decomposition import FactorAnalysis
 from sklearn.decomposition import LatentDirichletAllocation
+from sklearn.manifold import LocallyLinearEmbedding
 from sklearn.manifold import MDS
 from sklearn import svm, datasets
 from sklearn.tree import DecisionTreeClassifier
@@ -102,24 +103,25 @@ class FeatureExtraction:
         X_factor_df = X_factor_df.drop_duplicates(X_factor_df.index.duplicated(keep='first'))
         words_cleaned_factor = [w for w in X_factor_df.index]
 
-        print(X_factor_df)
+        return X_factor_df
 
     def isomap(self, X, words):
         trans = Isomap(n_components=10, n_neighbors=10)
         X_trans_isomap = trans.fit_transform(X)
-        X_df_isomap = pd.DataFrame(X_trans_isomap)
 
+        X_df_isomap = pd.DataFrame(X_trans_isomap)
         X_trans_df = X_df_isomap.drop_duplicates(X_df_isomap.index.duplicated(keep='first'))
         words_cleaned = [w for w in X_trans_df.index]
-        print(X_df_isomap)
+        return X_df_isomap
 
     def lda(self, X, words):
         latent_dirichlet_trans = LatentDirichletAllocation(n_components=3, max_iter=5, random_state=0)
         X_dirichlet = latent_dirichlet_trans.fit_transform(X)
-        X_df_lda = pd.DataFrame(X_dirichlet, index=words)
 
+        X_df_lda = pd.DataFrame(X_dirichlet, index=words)
         X_df_lda = X_df_lda.drop_duplicates(X_df_lda.index.duplicated(keep='first'))
         words_cleaned_lda = [w for w in X_df_lda.index]
+        return X_df_lda
 
     def mds(self, X, words):
 
@@ -133,7 +135,7 @@ class FeatureExtraction:
         """
 
         # need to reshape an array since 'expected 2D array, got scalar array instead'
-        X = np.array(X)
+        X = float(X)
         # X = X.reshape(1, -1)
 
         # mds = MDS(n_components=3,
@@ -147,19 +149,27 @@ class FeatureExtraction:
         #               dissimilarity='euclidean')
 
         mds = MDS(n_components=3)
-        X_transform = mds.fit_transform(X)
+        X_trans = mds.fit_transform(X)
         stress = mds.stress_
 
-        X_trans_df = pd.DataFrame(X_transform, index=words)
-        return X_transform
+        X_trans_df = pd.DataFrame(X_trans, index=words)
+        return X_trans
 
-    def lle(self, data):
-        # TODO: Locally Linear Embedding
-        pass
+    def lle(self, X, words):
+        """
+        According to scikit-learn documentation:
 
-    def ldm(self, data):
-        # TODO: Lafon’s Diffusion Maps
-        pass
+        "Locally linear embedding (LLE) seeks a lower-dimensional projection of the data
+         which preserves distances within local neighborhoods."
+
+        """
+        X = X.toarray()
+        lle = LocallyLinearEmbedding(n_components=3, eigen_solver='dense')
+        X_trans = lle.fit_transform(X)
+
+        X_df_lle = pd.DataFrame(X_trans, index=words)
+        X_trans_df = X_df_lle.drop_duplicates(X_df_lle.index.duplicated(keep='first'))
+        return X_trans_df
 
 
 class Autoencoder:
@@ -180,7 +190,6 @@ class Autoencoder:
         encoded = self.encoder(x)
         decoded = self.decoder(encoded)
         return decoded
-
 
     def autoencoder(self, data):
 
@@ -221,7 +230,7 @@ if __name__ == "__main__":
     test_text = pre.txt_preprocess(file_link='C:\/Users\Maryna Boroda\Documents\GitHub\DimReduction\exampl_text\wikitext1.txt')
     chunks = pre.chunks2_note(test_text)
     X, words = vec.vec_TF_IDF(cleaned_words=test_text)
-    
-    print(type(np.array(X)))
 
-    print(extraction.mds(X, test_text))
+    # print(X, words)
+
+    print(extraction.lle(X, words))
