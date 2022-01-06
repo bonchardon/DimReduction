@@ -14,8 +14,13 @@ from nltk.stem import WordNetLemmatizer
 # nltk.download('wordnet')
 
 # from genetic_selection import GeneticSelectionCV
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import chi2
+from sklearn.ensemble import ExtraTreesClassifier
+from sklearn.feature_selection import SelectFromModel
 from sklearn import datasets, linear_model
 from sklearn.model_selection import StratifiedKFold
+from sklearn.feature_selection import VarianceThreshold
 from sklearn.decomposition import PCA
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.manifold import Isomap
@@ -76,31 +81,6 @@ class FeatureSelection:
         rfecv = RFECV(estimator=DecisionTreeClassifier(), step=1, cv=StratifiedKFold(10), scoring='accuracy')
         rfecv.fit(X, y)
 
-    def feature_selection(self, data):
-
-        """
-        Genetic algorithms mimic the process of natural selection
-        to search for optimal values of a function.
-        """
-        X, y = None
-        estimator = linear_model.LogisticRegression(solver="liblinear", multi_class="ovr")
-        selector = GeneticSelectionCV(estimator,
-                                      cv=5,
-                                      verbose=1,
-                                      scoring="accuracy",
-                                      max_features=5,
-                                      n_population=50,
-                                      crossover_proba=0.5,
-                                      mutation_proba=0.2,
-                                      n_generations=40,
-                                      crossover_independent_proba=0.5,
-                                      mutation_independent_proba=0.05,
-                                      tournament_size=3,
-                                      n_gen_no_change=10,
-                                      caching=True,
-                                      n_jobs=-1)
-        selector = selector.fit_transform(X)
-
     def seq_feature_selection(self, data):
 
         """
@@ -122,7 +102,53 @@ class FeatureSelection:
         sfs.fit_transform(X, y)
         return sfs.get_feature_names_out()
 
+    def removing_low_var(self, data):
+
+        """
+        One of the possible ways to reduce dimensionality is to reduce the number of features
+        whose variance doesn't meet some threshold.
+
+        """
+
+        sel = VarianceThreshold(threshold=(.8 * (1 - .8)))
+        sel.fit_transform(X)
+        return sel
+
+    def univariate_selection(self, data):
+        """
+        Univariate feature selection works by selecting the best features based on univariate statistical tests.
+
+        :param data: best fit preprocessed data
+        """
+
+        X, y = data
+        X_new = SelectKBest(chi2, k=2).fit_transform(X, y)
+        return X_new
+
+    def tree_based(self, data):
+        """
+        Tree-based estimators (see the sklearn.tree module and forest of trees in the sklearn.ensemble module)
+        can be used to compute impurity-based feature importances,
+        which in turn can be used to discard irrelevant features
+        (when coupled with the SelectFromModel meta-transformer).
+
+        :param data: best fit preprocessed data
+        """
+        X, y = None
+        clf = ExtraTreesClassifier(n_estimators=50)
+        clf = clf.fit(X, y)
+        clf.feature_importances_
+        model = SelectFromModel(clf, prefit=True)
+        X_new = model.transform(X)
+
 
 if __name__ == "__main__":
 
     select = FeatureSelection()
+
+    from sklearn.datasets import load_iris
+    x = load_iris(return_X_y=False)
+
+    print(x)
+    print()
+

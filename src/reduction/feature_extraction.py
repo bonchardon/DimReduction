@@ -29,11 +29,13 @@ from sklearn.feature_selection import RFE, RFECV
 from sklearn.decomposition import TruncatedSVD
 from sklearn.decomposition import FactorAnalysis
 from sklearn.decomposition import LatentDirichletAllocation
+from sklearn.manifold import MDS
 from sklearn import svm, datasets
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.preprocessing import MinMaxScaler
-from tensorflow.keras import layers, losses
 
+import tensorflow as tf
+from tensorflow.keras import layers, losses
 from tensorflow.keras.models import Model, Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, UpSampling2D, Dropout, Flatten, Dense, Reshape
 
@@ -67,22 +69,11 @@ class FeatureExtraction:
     def __init__(self):
         pass
 
-    def svm(self, X, words):
-
-        """
-        On Support Vector Machines used for dimensionality reduction in low dimensionality vector.
-
-        :param X:
-        :param words:
-        """
-
-        trans = svm.SVC()
-        trans.fit(X, y=None)
-
     def svd(self, X, words):
         n_components = 3
         svd = TruncatedSVD(n_components)
         X_trans_svd = svd.fit_transform(X)
+
         X_trans_df = pd.DataFrame(X_trans_svd, index=words)
         X_trans_df = X_trans_df.drop_duplicates(X_trans_df.index.duplicated(keep='first'))
 
@@ -130,6 +121,67 @@ class FeatureExtraction:
         X_df_lda = X_df_lda.drop_duplicates(X_df_lda.index.duplicated(keep='first'))
         words_cleaned_lda = [w for w in X_df_lda.index]
 
+    def mds(self, X, words):
+
+        """
+        Multidimensional Scaling (using Scikit-Learn).
+
+        Normally the distance measure used in MDS is the Euclidean distance,
+        however, any other suitable dissimilarity metric can be used when applying MDS.
+
+        :param data: vectorized text data to be analyzed.
+        """
+
+        # need to reshape an array since 'expected 2D array, got scalar array instead'
+        X = np.array(X)
+        # X = X.reshape(1, -1)
+
+        # mds = MDS(n_components=3,
+        #               metric=True,
+        #               n_init=4,
+        #               max_iter=300,
+        #               verbose=0,
+        #               eps=0.001,
+        #               n_jobs=None,
+        #               random_state=42,
+        #               dissimilarity='euclidean')
+
+        mds = MDS(n_components=3)
+        X_transform = mds.fit_transform(X)
+        stress = mds.stress_
+
+        X_trans_df = pd.DataFrame(X_transform, index=words)
+        return X_transform
+
+    def lle(self, data):
+        # TODO: Locally Linear Embedding
+        pass
+
+    def ldm(self, data):
+        # TODO: Lafon’s Diffusion Maps
+        pass
+
+
+class Autoencoder:
+
+    def __init__(self, latent_dim):
+        super(Autoencoder, self).__init__()
+        self.latent_dim = latent_dim
+        self.encoder = tf.keras.Sequential([
+        layers.Flatten(),
+        layers.Dense(latent_dim, activation='relu'),
+        ])
+        self.decoder = tf.keras.Sequential([
+        layers.Dense(784, activation='sigmoid'),
+        layers.Reshape((28, 28))
+        ])
+
+    def call(self, x):
+        encoded = self.encoder(x)
+        decoded = self.decoder(encoded)
+        return decoded
+
+
     def autoencoder(self, data):
 
         encoded_dim = 2
@@ -158,53 +210,18 @@ class FeatureExtraction:
         autoencoder = keras.models.Sequential([encoder, decoder])
         autoencoder.compile(loss='mse', optimizer=keras.optimizers.SGD(lr=0.1))
 
-    def mds(self, data):
-        # TODO: try Multi-dimensional scaling
-        pass
-
-    def lle(self, data):
-        # TODO: Locally Linear Embedding
-        pass
-
-    def ldm(self, data):
-        # TODO: Lafon’s Diffusion Maps
-        pass
-
-
-class Autoencoder:
-    
-    def __init__(self, latent_dim):
-        super(Autoencoder, self).__init__()
-        self.latent_dim = latent_dim
-        self.encoder = tf.keras.Sequential([
-        layers.Flatten(),
-        layers.Dense(latent_dim, activation='relu'),
-        ])
-        self.decoder = tf.keras.Sequential([
-        layers.Dense(784, activation='sigmoid'),
-        layers.Reshape((28, 28))
-        ])
-
-    def call(self, x):
-        encoded = self.encoder(x)
-        decoded = self.decoder(encoded)
-        return decoded
-
 
 if __name__ == "__main__":
 
     pre = PreProcessing()
     vec = Vectorization()
-
     extraction = FeatureExtraction()
-
     distance = DistanceMetrics()
 
-    test_text = pre.txt_preprocess(file_link='wikitext1.txt')
-    test_text = vec.vec_hash(test_text)
+    test_text = pre.txt_preprocess(file_link='C:\/Users\Maryna Boroda\Documents\GitHub\DimReduction\exampl_text\wikitext1.txt')
+    chunks = pre.chunks2_note(test_text)
+    X, words = vec.vec_TF_IDF(cleaned_words=test_text)
+    
+    print(type(np.array(X)))
 
-    latent_dim = 64
-    autoencoder = Autoencoder(latent_dim)
-
-    autoencoder.compile(optimizer='adam', loss=losses.MeanSquaredError())
-
+    print(extraction.mds(X, test_text))

@@ -63,9 +63,9 @@ class Vectorization:
         vectorizer = CountVectorizer(binary=False, min_df=2)
         X = vectorizer.fit_transform(cleaned_words)
         feature_names = vectorizer.get_feature_names()
-        X = X.toarray()
+        df = pd.DataFrame(X.toarray().transpose(), index = vectorizer.get_feature_names())
 
-        return X
+        return X, vectorizer.get_feature_names()
 
     def vec_TF_IDF(self, cleaned_words):
 
@@ -108,7 +108,7 @@ class Vectorization:
                             columns=["TF-IDF"]
         ).sort_values("TF-IDF", ascending=False)
 
-        return df1
+        return X, vectorizer.get_feature_names()
 
     def vec_hash(self, cleaned_words):
 
@@ -139,10 +139,11 @@ if __name__ == "__main__":
     log.setLevel(logging.INFO)
 
     pre = PreProcessing()
+    vec = Vectorization()
     test_text = pre.txt_preprocess(file_link='wikitext1.txt')
 
-    vec = Vectorization()
-    test_text_try = vec.vec_TF_IDF(cleaned_words=test_text)
+    chunks = pre.chunks2_note(test_text)
+    test_text_try = vec.vec_TF_IDF(cleaned_words=chunks)
 
     print(test_text_try)
 
