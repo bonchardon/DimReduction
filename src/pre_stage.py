@@ -2,8 +2,12 @@ import nltk
 import logging
 import pandas as pd
 from nltk.corpus import stopwords
+stopwords.words('english')
 from nltk.stem import WordNetLemmatizer
+
 from itertools import islice
+
+import numpy as np
 
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer, HashingVectorizer
 from sklearn.pipeline import make_pipeline
@@ -16,35 +20,25 @@ class PreProcessing:
     def __init__(self):
         pass
 
-    @classmethod
-    def txt_preprocess(self, file_link):
+    @staticmethod
+    def txt_preprocess(file_link):
         example_text = open(file_link, 'r',
-                            encoding='utf-8-sig').read()
-        example_text = example_text.split(' ')
+                            encoding='utf-8-sig').readlines()
+        # example_text = example_text.split(' ')
 
         lemmatizer = WordNetLemmatizer()
-        stop_words = stopwords.words()
-        stop_words.extend(['th', 'asd', 'alphabet\/nalabama'])
-        words = [word for word in example_text if not word in stop_words]
+        stop_words = stopwords.words('english')
+        stop_words.extend(['th', 'asd', 'alphabet\/nalabama',
+                            'the', 'of', 'and'])
 
-        lemmatized_words = [lemmatizer.lemmatize(w) for w in words]
+        wrds = [text.split() for text in example_text]
+        wrds = [[w for w in text if not w in stop_words] for text in wrds]
 
-        return lemmatized_words
-
-    def chunks(self, data, size=1000):
-        it = iter(data)
-        for i in range(0, len(data), size):
-            yield list(data[k] for k in islice(it, size))
-
-    def chunks2_note(self, cleaned_words):
-        chunk1 = ' '.join(cleaned_words[0:3000])
-        chunk2 = ' '.join(cleaned_words[3000:6000])
-        chunk3 = ' '.join(cleaned_words[6000:8000])
-        chunk4 = ' '.join(cleaned_words[8000:9000])
-        chunk5 = ' '.join(cleaned_words[9000:])
-
-        chunks = [chunk1, chunk2, chunk3, chunk4, chunk5]
-        return chunks
+        lems = [
+            [lemmatizer.lemmatize(w) for w in lst] for lst in wrds
+        ]
+        lemmatized_texts = [' '.join(x) for x in lems]
+        return lemmatized_texts
 
 
 class Vectorization:
@@ -62,10 +56,11 @@ class Vectorization:
 
         vectorizer = CountVectorizer(binary=False, min_df=2)
         X = vectorizer.fit_transform(cleaned_words)
+        X = np.log(X.toarray() + 1)
         feature_names = vectorizer.get_feature_names()
-        df = pd.DataFrame(X.toarray().transpose(), index = vectorizer.get_feature_names())
+        # df = pd.DataFrame(X.toarray().transpose(), index=vectorizer.get_feature_names())
 
-        return X, vectorizer.get_feature_names()
+        return X, feature_names
 
     def vec_TF_IDF(self, cleaned_words):
 
@@ -92,22 +87,19 @@ class Vectorization:
         vectorizer = TfidfVectorizer()
 
         X = vectorizer.fit_transform(cleaned_words)
-        matrix = X.todense()
-        list_dense = matrix.tolist()
+        X = X.toarray()
 
-        #
-        pd.set_option('display.float_format', lambda x: '%.e2' % x)
-        df = pd.DataFrame(
-                            list_dense,
-                            columns=vectorizer.get_feature_names()
-                            )
-        # dataframe where we can
-        df1 = pd.DataFrame(
-                            X[0].T.todense(),
-                            index=vectorizer.get_feature_names(),
-                            columns=["TF-IDF"]
-        ).sort_values("TF-IDF", ascending=False)
-
+        # pd.set_option('display.float_format', lambda x: '%.e2' % x)
+        # df = pd.DataFrame(
+        #                     X,
+        #                     columns=vectorizer.get_feature_names()
+        #                     )
+        # dataframe where we can see all the most 'valuable' tokens
+        # df1 = pd.DataFrame(
+        #                     X,
+        #                     index=vectorizer.get_feature_names(),
+        #                     columns=["TF-IDF"]
+        # ).sort_values("TF-IDF", ascending=False)
         return X, vectorizer.get_feature_names()
 
     def vec_hash(self, cleaned_words):
@@ -179,10 +171,7 @@ if __name__ == "__main__":
 
     pre = PreProcessing()
     vec = Vectorization()
-    test_text = pre.txt_preprocess(file_link='wikitext1.txt')
 
-    chunks = pre.chunks2_note(test_text)
-    test_text_try = vec.vec_TF_IDF(cleaned_words=chunks)
-
+    test_text = PreProcessing.txt_preprocess(file_link="C:\/Users\Maryna Boroda\Documents\GitHub\DimReduction\exampl_text\wikitext1.txt")
+    test_text_try = vec.vec_count(cleaned_words=test_text)
     print(test_text_try)
-

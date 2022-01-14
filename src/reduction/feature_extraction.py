@@ -18,6 +18,7 @@ from nltk.stem import WordNetLemmatizer
 # nltk.download('wordnet')
 
 # from genetic_selection import GeneticSelectionCV
+from sklearn.pipeline import make_pipeline
 from sklearn import datasets, linear_model
 from sklearn.model_selection import StratifiedKFold
 from sklearn.decomposition import PCA
@@ -31,14 +32,27 @@ from sklearn.decomposition import FactorAnalysis
 from sklearn.decomposition import LatentDirichletAllocation
 from sklearn.manifold import LocallyLinearEmbedding
 from sklearn.manifold import MDS
+from sklearn.neighbors import NeighborhoodComponentsAnalysis
 from sklearn import svm, datasets
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import minmax_scale
+
+from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
+from tensorflow.keras.layers import LeakyReLU
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Input
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.layers import BatchNormalization
+from tensorflow.keras.models import load_model
 
 import tensorflow as tf
 from tensorflow.keras import layers, losses
 from tensorflow.keras.models import Model, Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, UpSampling2D, Dropout, Flatten, Dense, Reshape
+
+from torch import nn, optim
 
 from src.pre_stage import PreProcessing, Vectorization
 from src.distance_metrics import DistanceMetrics
@@ -71,22 +85,34 @@ class FeatureExtraction:
         pass
 
     def svd(self, X, words):
-        n_components = 3
-        svd = TruncatedSVD(n_components)
+
+        n_components = 5
+        svd = TruncatedSVD(n_components, random_state=42)
         X_trans_svd = svd.fit_transform(X)
 
-        X_trans_df = pd.DataFrame(X_trans_svd, index=words)
-        X_trans_df = X_trans_df.drop_duplicates(X_trans_df.index.duplicated(keep='first'))
+        # X_trans_df = pd.DataFrame(X_trans_svd, index=words)
+        # X_trans_df = X_trans_df.drop_duplicates(X_trans_df.index.duplicated(keep='first'))
+        # words_cleaned = [w for w in X_trans_df.index]
 
-        words_cleaned = [w for w in X_trans_df.index]
-        return X_trans_df
+        # for i, comp in enumerate(svd.components_):
+        #     terms_in_comp = zip(words, comp)
+        #     # sorted_terms = sorted(terms_in_comp, key=lambda x: x[1], reverse=True)
+        #     sorted_terms = sorted(terms_in_comp, key=lambda x: x[1], reverse=True)[:10]
+        #     print("Concept %d: " % i)
+        #     # keywords = []
+        #     for term in sorted_terms:
+        #         print(term[0])
+        #     # return keywords
+        #     print(" ")
+
+        return svd.explained_variance_ratio_
 
     def pca(self, X, words):
         # from sparce to dence matrix
-        X_dense = X.todense()
+        # X_dense = X.todense()
 
-        transformer = PCA(n_components=3)
-        X_trans_psa = transformer.fit_transform(X_dense)
+        transformer = PCA()
+        X_trans_psa = transformer.fit_transform(X)
         X_trans_df_pca = pd.DataFrame(X_trans_psa, index=words)
 
         # it appears that the number of duplicates is large
@@ -156,6 +182,7 @@ class FeatureExtraction:
         return X_trans
 
     def lle(self, X, words):
+
         """
         According to scikit-learn documentation:
 
@@ -163,74 +190,48 @@ class FeatureExtraction:
          which preserves distances within local neighborhoods."
 
         """
-        X = X.toarray()
+
+        # X = X.toarray()
         lle = LocallyLinearEmbedding(n_components=3, eigen_solver='dense')
-        X_trans = lle.fit_transform(X)
+        X_trans = lle.fit(X)
 
         X_df_lle = pd.DataFrame(X_trans, index=words)
         X_trans_df = X_df_lle.drop_duplicates(X_df_lle.index.duplicated(keep='first'))
         return X_trans_df
 
+    def nca(self, X, words):
 
-class Autoencoder:
+        """
+        Neighborhood Components Analysis (NCA) tries to find a feature space
+        such that a stochastic nearest neighbor algorithm will give the best accuracy.
+        Like LDA, it is a supervised method.
 
-    def __init__(self, latent_dim):
-        super(Autoencoder, self).__init__()
-        self.latent_dim = latent_dim
-        self.encoder = tf.keras.Sequential([
-        layers.Flatten(),
-        layers.Dense(latent_dim, activation='relu'),
-        ])
-        self.decoder = tf.keras.Sequential([
-        layers.Dense(784, activation='sigmoid'),
-        layers.Reshape((28, 28))
-        ])
 
-    def call(self, x):
-        encoded = self.encoder(x)
-        decoded = self.decoder(encoded)
-        return decoded
+        :param X:
+        :param words:
+        """
 
-    def autoencoder(self, data):
+        nca = NeighborhoodComponentsAnalysis(n_components=3)
 
-        encoded_dim = 2
-        encoder = Sequential([
-            Conv2D(input_shape=(44, 44, 3), filters=64, kernel_size=(3, 3), activation='relu', padding='same'),
-            MaxPooling2D((2, 2), padding='same'),
-            Conv2D(32, (3, 3), activation='relu', padding='same'),
-            MaxPooling2D((2, 2), padding='same'),
-            Conv2D(16, (3, 3), activation='relu', padding='same'),
-            Flatten(),
-            Dense(encoded_dim)
-        ])
-
-        pretrain_encodings = encoder(data).numpy()
-
-        decoder = Sequential([
-            Dense(1936, activation='relu', input_shape=(encoded_dim,)),
-            Reshape((11, 11, 16)),
-            Conv2D(32, (3, 3), activation='relu', padding='same'),
-            UpSampling2D((2, 2)),
-            Conv2D(64, (3, 3), activation='relu', padding='same'),
-            UpSampling2D((2, 2)),
-            Conv2D(3, (3, 3), padding='same')
-        ])
-
-        autoencoder = keras.models.Sequential([encoder, decoder])
-        autoencoder.compile(loss='mse', optimizer=keras.optimizers.SGD(lr=0.1))
+        pass
 
 
 if __name__ == "__main__":
 
-    pre = PreProcessing()
     vec = Vectorization()
     extraction = FeatureExtraction()
     distance = DistanceMetrics()
 
-    test_text = pre.txt_preprocess(file_link='C:\/Users\Maryna Boroda\Documents\GitHub\DimReduction\exampl_text\wikitext1.txt')
-    chunks = pre.chunks2_note(test_text)
+    test_text = PreProcessing.txt_preprocess(file_link=
+                                   'C:\/Users\Maryna Boroda\Documents\GitHub\DimReduction\exampl_text\wikitext1.txt')
     X, words = vec.vec_TF_IDF(cleaned_words=test_text)
 
     # print(X, words)
 
-    print(extraction.lle(X, words))
+    df1 = pd.DataFrame(
+                    X,
+                    index=words,
+                    columns=["TF-IDF"]
+                        ).sort_values("TF-IDF", ascending=False)
+
+    print(extraction.svd(X, words))

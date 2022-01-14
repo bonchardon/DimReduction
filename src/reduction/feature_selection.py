@@ -38,6 +38,9 @@ from tensorflow.keras import layers, losses
 from tensorflow.keras.models import Model, Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, UpSampling2D, Dropout, Flatten, Dense, Reshape
 
+from src.pre_stage import PreProcessing, Vectorization
+from src.distance_metrics import DistanceMetrics
+
 
 class FeatureSelection:
 
@@ -52,7 +55,8 @@ class FeatureSelection:
             (3) sequential feature selection (forward/backward).
         """
 
-    def feature_elimination(self, data):
+    def feature_elimination(self, X, y):
+        from sklearn.svm import SVR
 
         """
         RFE works by searching for a subset of features by starting with all features in the training dataset
@@ -63,23 +67,13 @@ class FeatureSelection:
         This process is repeated until a specified number of features remains.
         """
 
-        # TODO: figure out how to split the data effectively into X, y values for further use
-
-        X, y = None
-
-        # There might be useful to drop highly correlated features by making a correlating matrix.
-        correlated_features = set()
-        correlation_matr = data.corr()
-
-        for i in range(len(correlation_matr.columns)):
-            for j in range(i):
-                if abs(correlation_matr.iloc[i, j]) > 0.8:
-                    colname = correlation_matr.columns[i]
-                    correlated_features.add(colname)
+        X, y = X, y
+        estimator = SVR(kernel="linear")
 
         # if use RFECV, the number of features to select will be chosen automatically
-        rfecv = RFECV(estimator=DecisionTreeClassifier(), step=1, cv=StratifiedKFold(10), scoring='accuracy')
-        rfecv.fit(X, y)
+        rfecv = RFECV(estimator, step=1, cv=5)
+        rfecv = rfecv.decision_function(X)
+        return rfecv
 
     def seq_feature_selection(self, data):
 
@@ -100,55 +94,44 @@ class FeatureSelection:
         knn = KNeighborsClassifier(n_neighbors=3)
         sfs = SequentialFeatureSelector(knn, n_features_to_select=100)
         sfs.fit_transform(X, y)
-        return sfs.get_feature_names_out()
+        return sfs
 
-    def removing_low_var(self, data):
+    def removing_low_var(self, df):
 
         """
         One of the possible ways to reduce dimensionality is to reduce the number of features
         whose variance doesn't meet some threshold.
 
+        :param df: dataframe that consists of words represented as vectors
         """
+        sel = VarianceThreshold(threshold=0.0009)
+        sel.fit_transform(df)
+        return df[df.columns[sel.get_support(indices=True)]]
 
-        sel = VarianceThreshold(threshold=(.8 * (1 - .8)))
-        sel.fit_transform(X)
-        return sel
-
-    def univariate_selection(self, data):
+    def univariate_selection(self, X, words):
         """
         Univariate feature selection works by selecting the best features based on univariate statistical tests.
 
         :param data: best fit preprocessed data
         """
 
-        X, y = data
-        X_new = SelectKBest(chi2, k=2).fit_transform(X, y)
-        return X_new
+        X, y = X, words
 
-    def tree_based(self, data):
-        """
-        Tree-based estimators (see the sklearn.tree module and forest of trees in the sklearn.ensemble module)
-        can be used to compute impurity-based feature importances,
-        which in turn can be used to discard irrelevant features
-        (when coupled with the SelectFromModel meta-transformer).
-
-        :param data: best fit preprocessed data
-        """
-        X, y = None
-        clf = ExtraTreesClassifier(n_estimators=50)
-        clf = clf.fit(X, y)
-        clf.feature_importances_
-        model = SelectFromModel(clf, prefit=True)
-        X_new = model.transform(X)
+        X_new = SelectKBest(chi2, k=4)
+        fit = X_new.fit(y, X)
+        return fit
 
 
 if __name__ == "__main__":
 
     select = FeatureSelection()
+    vec = Vectorization()
+    distance = DistanceMetrics()
 
-    from sklearn.datasets import load_iris
-    x = load_iris(return_X_y=False)
+    test_text = PreProcessing.txt_preprocess(file_link=
+                                             'C:\/Users\Maryna Boroda\Documents\GitHub\DimReduction\exampl_text\wikitext1.txt')
+    X, words = vec.vec_TF_IDF(cleaned_words=test_text)
+    df = pd.DataFrame(X, columns=[words])
 
-    print(x)
-    print()
+    print(select.tree_based(X, words))
 
