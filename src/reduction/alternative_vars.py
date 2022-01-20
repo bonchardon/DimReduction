@@ -1,5 +1,13 @@
 import keras.models
+
+import xgboost
+
 from gensim import models
+from gensim.models import Word2Vec
+from gensim.models.doc2vec import Doc2Vec, TaggedDocument
+from gensim.models.word2vec import LineSentence
+import gensim.downloader
+import gensim.downloader as api
 
 import pandas as pd
 import numpy as np
@@ -33,6 +41,8 @@ from tensorflow.keras import layers, losses
 from tensorflow.keras.models import Model, Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, UpSampling2D, Dropout, Flatten, Dense, Reshape
 
+from src.pre_stage import PreProcessing
+
 
 class Alternative:
 
@@ -50,17 +60,35 @@ class Alternative:
     def word2vec(self, cleaned_data):
 
         # TODO: prepare word2vec model for further work
+        word2vec = Word2Vec([i for i in cleaned_data], min_count=1)
+        word2vec.build_vocab(cleaned_data)
+        word2vec.save('word2vec.model')
 
-        w2v = models.KeyedVectors.load_word2vec_format(
-                            './GoogleNews-vectors-negative300.bin',
-                            binary=True)
-        custom_model = models.Word2Vec(cleaned_data,
-                                       min_count=1, size=300,
-                                       workers=4)
+        model = Word2Vec.load("word2vec.model")
+        model.train([cleaned_data], total_examples=1, epochs=1)
+        # sims = word2vec.wv.most_similar('anarchism', topn=2)
+        vector = model.wv.key_to_index['anarchism']
+        return vector
 
-        # visualization part
+    def word2vec_pre(self):
 
-        return custom_model
+        model = api.load('word2vec-google-news-300')
+        # model.save('word2vec_pre.model')
+
+        vector = model.wv['computer']
+        return vector
+
+    def doc2vec(self, data):
+        from gensim.test.utils import get_tmpfile
+        documents = [TaggedDocument(doc, [i]) for i, doc in enumerate(data)]
+        model = Doc2Vec(documents, vector_size=5, window=2, min_count=1, workers=4)
+
+        file_ = get_tmpfile("doc2vec_model")
+        model.save(file_)
+
+        model = Doc2Vec.load(file_)
+
+        vector = model.infer_vector([data])
 
     def glove(self, cleaned_data):
 
@@ -73,20 +101,34 @@ class Alternative:
                 vector = np.asarray(values[1:], "float32")
                 embeddings[word] = vector
 
-
             # getting closest word by using glove algo
             def find_closest_embeddings(embedding):
                 return sorted(embeddings.keys(), key=lambda word:
 
             spatial.distance.euclidean(embeddings[word], embedding))
 
-            find_closest_embeddings(embeddings[b"example"])[:10]
-
     def fastText(self, cleaned_data):
 
-        pass
+        ft_model = FastText(word_tokenized_corpus,
+                            size=embedding_size,
+                            window=window_size,
+                            min_count=min_word,
+                            sample=down_sampling,
+                            sg=1,
+                            iter=100)
 
 
 if __name__ == "__main__":
 
     vars = Alternative()
+    words = PreProcessing.txt_preprocess(
+            file_link=
+            "C:\/Users\Maryna Boroda\Documents\GitHub\DimReduction\exampl_text\wikitext1.txt")
+
+    # words = [sent.split() for sent in words]
+    # words = words.split()
+    # print(vars.word2vec(cleaned_data=words))
+
+    print(vars.word2vec_pre)
+
+

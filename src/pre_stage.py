@@ -163,6 +163,38 @@ class Scaling:
         pass
 
 
+class MultoColl:
+
+    def __init__(self):
+        pass
+
+    """
+    Checking for multicollinearity is a very important step during the feature selection process. 
+    Multicollinearity can significantly reduce the model’s performance. 
+    """
+
+    @staticmethod
+    def vif(df):
+
+        import statsmodels.api as sm
+        from statsmodels.stats.outliers_influence import variance_inflation_factor
+
+        """
+        VIF is a number that determines whether a variable has multicollinearity or not.
+        That number also represents how much a variable is inflated because of the linear dependence with other variables.
+        
+        :param df: preprocessed and cleaned data, ready to be used in the feature selection analysis.
+        """
+        # TODO: deal with inf problem (all the results are inf).
+        #   possible issue: This shows a perfect correlation between two independent variables.
+        #   In the case of perfect correlation, we get R2 =1, which lead to 1/(1-R2) infinity.
+
+        vif_info = pd.DataFrame()
+        vif_info['VIF'] = [variance_inflation_factor(df.values, i) for i in range(df.shape[1])]
+        vif_info['Column'] = df.columns
+        return vif_info.sort_values('VIF', ascending=False)
+
+
 if __name__ == "__main__":
 
     logging.basicConfig()
@@ -173,5 +205,8 @@ if __name__ == "__main__":
     vec = Vectorization()
 
     test_text = PreProcessing.txt_preprocess(file_link="C:\/Users\Maryna Boroda\Documents\GitHub\DimReduction\exampl_text\wikitext1.txt")
-    test_text_try = vec.vec_count(cleaned_words=test_text)
-    print(test_text_try)
+    X, words = vec.vec_count(cleaned_words=test_text)
+
+    df = pd.DataFrame(X, columns=[words])
+    print(df.reset_index(drop=True))
+    print(MultoColl.vif(df=df))
