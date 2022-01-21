@@ -8,9 +8,11 @@ from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 from gensim.models.word2vec import LineSentence
 import gensim.downloader
 import gensim.downloader as api
+from gensim.test.utils import get_tmpfile
 
 import pandas as pd
 import numpy as np
+import nltk
 import matplotlib.pyplot as plt
 
 from scipy import spatial
@@ -58,37 +60,33 @@ class Alternative:
         pass
 
     def word2vec(self, cleaned_data):
+        from sklearn.decomposition import PCA
 
-        # TODO: prepare word2vec model for further work
-        word2vec = Word2Vec([i for i in cleaned_data], min_count=1)
-        word2vec.build_vocab(cleaned_data)
-        word2vec.save('word2vec.model')
+        word2vec = Word2Vec(cleaned_data, min_count=4)
+        word2vec.train(cleaned_data, total_examples=1, epochs=1)
 
-        model = Word2Vec.load("word2vec.model")
-        model.train([cleaned_data], total_examples=1, epochs=1)
-        # sims = word2vec.wv.most_similar('anarchism', topn=2)
-        vector = model.wv.key_to_index['anarchism']
-        return vector
+        # in case we want to save and use this later
+        # word2vec.save('word2vec.model')
+        # model = Word2Vec.load("word2vec.model")
+
+        return word2vec
 
     def word2vec_pre(self):
 
         model = api.load('word2vec-google-news-300')
         # model.save('word2vec_pre.model')
-
         vector = model.wv['computer']
         return vector
 
     def doc2vec(self, data):
-        from gensim.test.utils import get_tmpfile
+
         documents = [TaggedDocument(doc, [i]) for i, doc in enumerate(data)]
-        model = Doc2Vec(documents, vector_size=5, window=2, min_count=1, workers=4)
+        model = Doc2Vec(documents, vector_size=20, window=2, min_count=1, workers=4)
+        # here is the way how to check similarity between docs
 
-        file_ = get_tmpfile("doc2vec_model")
-        model.save(file_)
+        test_doc = nltk.word_tokenize("random bullshit to check the effectiveness of the algo duh")
 
-        model = Doc2Vec.load(file_)
-
-        vector = model.infer_vector([data])
+        return model.docvecs.most_similar(positive=[model.infer_vector(test_doc)], topn=5)
 
     def glove(self, cleaned_data):
 
@@ -107,7 +105,16 @@ class Alternative:
 
             spatial.distance.euclidean(embeddings[word], embedding))
 
-    def fastText(self, cleaned_data):
+    def fastText(self, word_tokenized_corpus):
+        """
+        FastText algo may be useful, since with it's help one can get a vector representation of a word
+        that is not in a corpus
+        """
+
+        embedding_size = 5
+        window_size = 5
+        min_word = 5
+        down_sampling = 5
 
         ft_model = FastText(word_tokenized_corpus,
                             size=embedding_size,
@@ -121,14 +128,10 @@ class Alternative:
 if __name__ == "__main__":
 
     vars = Alternative()
+
     words = PreProcessing.txt_preprocess(
             file_link=
             "C:\/Users\Maryna Boroda\Documents\GitHub\DimReduction\exampl_text\wikitext1.txt")
 
-    # words = [sent.split() for sent in words]
-    # words = words.split()
-    # print(vars.word2vec(cleaned_data=words))
-
-    print(vars.word2vec_pre)
-
-
+    words = [sent.split() for sent in words]
+    print(vars.doc2vec(words))
