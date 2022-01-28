@@ -28,7 +28,8 @@ class DistanceMetrics:
         df_dist = df.sort_values(by=[1, 2, 3, 4, 5, 6], ascending=False).index[:500]
         return df_dist
 
-    def cosine_dist(self, dataframe):
+    @staticmethod
+    def cosine_dist(dataframe):
         cosine_distance = cosine_similarity(dataframe)
         X_cosine_dist = pd.DataFrame(cosine_distance, index=dataframe.index)
 
@@ -39,4 +40,4 @@ class DistanceMetrics:
 
 if __name__ == "__main__":
 
-   DistanceMetrics()
+   dist = DistanceMetrics()

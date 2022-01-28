@@ -38,8 +38,8 @@ from tensorflow.keras import layers, losses
 from tensorflow.keras.models import Model, Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, UpSampling2D, Dropout, Flatten, Dense, Reshape
 
-from src.pre_stage import PreProcessing, Vectorization
-from src.distance_metrics import DistanceMetrics
+from src.main.pre_stage import PreProcessing, Vectorization
+from src.main.distance_metrics import DistanceMetrics
 
 
 class FeatureSelection:

@@ -51,8 +51,8 @@ from tensorflow.keras.layers import Conv2D, MaxPooling2D, UpSampling2D, Dropout,
 
 from torch import nn, optim
 
-from src.pre_stage import PreProcessing, Vectorization
-from src.distance_metrics import DistanceMetrics
+from src.main.pre_stage import PreProcessing, Vectorization
+from src.main.distance_metrics import DistanceMetrics
 
 
 """
@@ -108,12 +108,12 @@ class FeatureExtraction:
         # from sparce to dence matrix
         # X_dense = X.todense()
 
-        transformer = PCA()
+        transformer = PCA(n_components=2)
         X_trans_psa = transformer.fit_transform(X)
         X_trans_df_pca = pd.DataFrame(X_trans_psa, index=words)
 
         # it appears that the number of duplicates is large
-        X_trans_df_pca = X_trans_df_pca.drop_duplicates(X_trans_df_pca.index.duplicated(keep='first'))
+        # X_trans_df_pca = X_trans_df_pca.drop_duplicates(X_trans_df_pca.index.duplicated(keep='first'))
         words_cleaned = [w for w in X_trans_df_pca.index]
         return X_trans_df_pca
 
@@ -210,6 +210,9 @@ class FeatureExtraction:
 
         nca = NeighborhoodComponentsAnalysis(n_components=3)
 
+        pass
+
+    def t_SNE(self, df):
         pass
 
 

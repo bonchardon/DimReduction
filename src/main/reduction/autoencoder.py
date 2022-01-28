@@ -13,7 +13,7 @@ from tensorflow.keras.layers import Conv2D, MaxPooling2D, UpSampling2D, Dropout,
 
 from sklearn.model_selection import train_test_split
 
-from src.pre_stage import PreProcessing, Vectorization
+from src.main.pre_stage import PreProcessing, Vectorization
 
 
 class Autoencoder(Model):

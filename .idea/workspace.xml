@@ -3,10 +3,13 @@
   <component name="ChangeListManager">
     <list default="true" id="f504e67d-c5da-4792-a85d-700b93a2b304" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/reduction/alternative_vars.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/reduction/alternative_vars.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/reduction/feature_extraction.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/reduction/feature_extraction.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/reduction/word2vec.model" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/reduction_final.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/reduction_final.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/exampl_text/wikitext1.txt" beforeDir="false" afterPath="$PROJECT_DIR$/exampl_text/wikitext1.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/distance_metrics.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/distance_metrics.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/reduction/alternative_vars.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/reduction/alternative_vars.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/reduction/autoencoder.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/reduction/autoencoder.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/reduction/feature_extraction.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/reduction/feature_extraction.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/reduction/feature_selection.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/reduction/feature_selection.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/reduction_final.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/reduction_final.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -24,9 +27,10 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File" value="Python" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
-  <component name="RunManager" selected="Python.alternative_vars">
+  <component name="RunManager" selected="Python.reduction_final">
     <configuration name="alternative_vars" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="DimReduction" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -69,8 +73,52 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="reduction_final" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="DimReduction" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/main" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/main/reduction_final.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="scratch_5" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="DimReduction" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$APPLICATION_CONFIG_DIR$/scratches" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$APPLICATION_CONFIG_DIR$/scratches/scratch_5.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.reduction_final" />
+        <item itemvalue="Python.scratch_5" />
         <item itemvalue="Python.alternative_vars" />
         <item itemvalue="Python.download_model" />
       </list>
