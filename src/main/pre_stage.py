@@ -8,6 +8,7 @@ from nltk.stem import WordNetLemmatizer
 from itertools import islice
 
 import numpy as np
+from scipy.spatial import distance
 
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer, HashingVectorizer
 from sklearn.pipeline import make_pipeline
@@ -54,7 +55,7 @@ class Vectorization:
         :param cleaned_words: preprocessed and cleaned dataset that is separated in chunks.
         """
 
-        vectorizer = CountVectorizer(binary=False, min_df=2)
+        vectorizer = CountVectorizer(binary=False, min_df=1)
         X = vectorizer.fit_transform(cleaned_words)
         X = np.log(X.toarray() + 1)
         feature_names = vectorizer.get_feature_names()

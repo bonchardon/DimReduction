@@ -3,12 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="f504e67d-c5da-4792-a85d-700b93a2b304" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/exampl_text/wikitext1.txt" beforeDir="false" afterPath="$PROJECT_DIR$/exampl_text/wikitext1.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/distance_metrics.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/distance_metrics.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/reduction/alternative_vars.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/reduction/alternative_vars.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/pre_stage.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/pre_stage.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/reduction/autoencoder.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/reduction/autoencoder.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/reduction/feature_extraction.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/reduction/feature_extraction.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/reduction/feature_selection.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/reduction/feature_selection.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/reduction_final.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/reduction_final.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

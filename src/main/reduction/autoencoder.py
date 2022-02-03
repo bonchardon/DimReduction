@@ -10,9 +10,7 @@ import tensorflow as tf
 from tensorflow.keras import layers, losses
 from tensorflow.keras.models import Model, Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, UpSampling2D, Dropout, Flatten, Dense, Reshape
-
 from sklearn.model_selection import train_test_split
-
 from src.main.pre_stage import PreProcessing, Vectorization
 
 

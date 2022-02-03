@@ -8,6 +8,8 @@ import numpy as np
 import pickle
 import pandas as pd
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import normalize
+from scipy.spatial import distance
 
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.pipeline import make_pipeline
@@ -21,6 +23,8 @@ from src.main.reduction.feature_extraction import FeatureExtraction
 from src.main.reduction.autoencoder import Autoencoder
 from src.main.reduction.alternative_vars import Alternative
 from src.main.distance_metrics import DistanceMetrics
+
+from sklearn.manifold import TSNE
 
 
 class DimRed:
@@ -77,6 +81,7 @@ class pca:
 
     @staticmethod
     def compute_pca(X: np.ndarray, n_components: int = 2) -> np.ndarray:
+
         """Calculate the principal components for X
 
         Args:
@@ -137,40 +142,74 @@ if __name__ =="__main__":
 
     words = [sent.split() for sent in words]
     words = [item for sublist in words for item in sublist]
-
     model = pickle.load(open("C:\/Users\Maryna Boroda\Documents\GitHub\DimReduction\src\main\/reduction\glove_word2vec.sav", 'rb'))
 
-    words_try = ['anarchy', 'oil', 'gas', 'happy', 'sad', 'city', 'town',
-                 'village', 'country', 'continent', 'petroleum', 'joyful', 'marine']
-
-    subset = np.array([model[word] for word in words_try])
+    subset = np.array([model[word] for word in words])
 
     reduced = pca.compute_pca(subset)
-    reduced_aut = FeatureExtraction.pca(X=subset, words=words_try)
+    reduced_aut = FeatureExtraction.pca(X=subset, words=words)
+    print(reduced_aut)
 
     df_pca = pd.DataFrame(reduced, columns='X Y'.split())
-    df_pca.index = words_try
-    print(df_pca)
+    df_pca.index = words
+    # print(df_pca)
 
-    # print(len(DistanceMetrics.cosine_dist(dataframe=reduced)))
+    """
+    Just trying here some vizualization
+    """
 
-    X = list(df_pca['X'])
-    Y = list(df_pca['Y'])
+    tsne = TSNE(n_components=3)
+    X_tsne = tsne.fit_transform(subset)
+    df_tsne = pd.DataFrame(X_tsne, columns='X Y Z'.split())
+    df_tsne.index = words
+    print(df_tsne)
+
+
+
+
+    plt.style.use('seaborn')
+
+    X = list(df_tsne['X'])
+    Y = list(df_tsne['Y'])
+    Z = list(df_tsne['Z'])
+    # colors = {'Setosa': '#FCEE0C', 'Versicolor': '#FC8E72', 'Virginica': '#FC3DC9'}
 
     fig, ax = plt.subplots()
-    ax.scatter(X, Y)
+    ax.scatter(X, Y, c=Y,
+               # norm=plt.colors.Normalize,
+               cmap="nipy_spectral"
+               )
 
-    for i, txt in enumerate(words_try):
+    for i, txt in enumerate(words):
         ax.annotate(txt, (X[i], Y[i]))
 
+    plt.title("First three PCA components")
+    plt.legend(loc='best', shadow=False, scatterpoints=1)
+    plt.xlabel('1st PCA component')
+    plt.ylabel('2nd PCA component')
     plt.show()
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     # TODO: our dataframe with word2vec vectors
-    #   measure closest values using cosine similarity, euclidean, etc.
+    #  measure closest values using cosine similarity, euclidean, etc.
     from scipy.spatial.distance import cdist, pdist
     from scipy.spatial import distance
-    data = {"word": words_try, "vector": list(subset)}
+    data = {"word": words, "vector": list(subset)}
     df = pd.DataFrame(data)
-    print(df)
 
-    print(distance.cdist(subset, subset, 'euclidean'))
+    print(df)
+    #
+    # print(distance.cdist(subset, subset, 'euclidean'))

@@ -14,42 +14,19 @@ from nltk.stem import WordNetLemmatizer
 # nltk.download('stopwords')
 # nltk.download('wordnet')
 
-# from genetic_selection import GeneticSelectionCV
-from sklearn.pipeline import make_pipeline
-from sklearn import datasets, linear_model
-from sklearn.model_selection import StratifiedKFold
 from sklearn.decomposition import PCA
-from sklearn.neighbors import KNeighborsClassifier
 from sklearn.manifold import Isomap
-from sklearn.linear_model import LogisticRegression
-from sklearn.feature_selection import SequentialFeatureSelector
-from sklearn.feature_selection import RFE, RFECV
 from sklearn.decomposition import TruncatedSVD
 from sklearn.decomposition import FactorAnalysis
 from sklearn.decomposition import LatentDirichletAllocation
 from sklearn.manifold import LocallyLinearEmbedding
 from sklearn.manifold import MDS
 from sklearn.neighbors import NeighborhoodComponentsAnalysis
+from sklearn.manifold import TSNE
 from sklearn import svm, datasets
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import minmax_scale
-
-from sklearn.datasets import make_classification
-from sklearn.model_selection import train_test_split
-from tensorflow.keras.layers import LeakyReLU
-from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Input
-from tensorflow.keras.layers import Dense
-from tensorflow.keras.layers import BatchNormalization
-from tensorflow.keras.models import load_model
-
-import tensorflow as tf
-from tensorflow.keras import layers, losses
-from tensorflow.keras.models import Model, Sequential
-from tensorflow.keras.layers import Conv2D, MaxPooling2D, UpSampling2D, Dropout, Flatten, Dense, Reshape
-
-from torch import nn, optim
 
 from src.main.pre_stage import PreProcessing, Vectorization
 from src.main.distance_metrics import DistanceMetrics
@@ -213,7 +190,10 @@ class FeatureExtraction:
         pass
 
     def t_SNE(self, df):
-        pass
+        tsne_try = TSNE(n_components=2, learning_rate='auto', init='random').fit_transform(subset)
+        df_tsne = pd.DataFrame(tsne_try, columns='X Y'.split())
+        df_tsne.index = words_try
+        print(df_tsne)
 
 
 if __name__ == "__main__":
