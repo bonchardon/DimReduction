@@ -11,7 +11,7 @@ from tensorflow.keras import layers, losses
 from tensorflow.keras.models import Model, Sequential
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, UpSampling2D, Dropout, Flatten, Dense, Reshape
 from sklearn.model_selection import train_test_split
-from src.main.pre_stage import PreProcessing, Vectorization
+from DimReduction.src.main.pre_stage import PreProcessing, Vectorization
 
 
 class Autoencoder(Model):
@@ -45,12 +45,12 @@ if __name__ == "__main__":
     # train and test sets
 
     data = pre.txt_preprocess(
-        file_link='C:\/Users\Maryna Boroda\Documents\GitHub\DimReduction\exampl_text\wikitext1.txt')
+        file_link="C:\/Users\Марина\Documents\GitHub\DimReduction\exampl_text\/text2.txt")
     random.shuffle(data)
 
     X, words = vec.vec_TF_IDF(cleaned_words=data)
     # X = np.array(X.transpose())
-    print(type(X.toarray()), X.toarray())
+    print(X)
 
     X_train, X_test, y_train, y_test = train_test_split(X, words)
 
